@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/index.css" />
+	</head>
+
+	<body>
+		<div id="boxs">
+			<ul>
+				<li class="select">注册</li>
+				<li>登录</li>
+			</ul>
+			<div class="select">
+				<input type="file" id="img" /><br />
+				<input type="text" id="user" placeholder="用户名" /><br />
+				<input type="password" id="pass" placeholder="密码" /><br />
+				<button id="btn">注册</button>
+			</div>
+			<div>
+				<input type="text" id="user1" placeholder="用户名" /><br />
+				<input type="password" id="pass1" placeholder="密码" /><br />
+				<button id="btn1">登录</button>
+				<h1 id="box"></h1>
+			</div>
+		</div>
+		<div class="news" id="news">
+			<div class="news-top">
+				<p class="news-h2">新闻列表</p>
+				<p class="news-p">用户</p>
+				<div id="newstu"></div>
+			</div>
+			<div class="newslist">
+				<ul id="ul">
+						
+				</ul>
+			</div>
+		</div>
+	</body>
+
+</html>
+<script src="js/index.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+	var urlimg = ''
+	img.onchange = function() {
+		var f = this.files[0]
+		var d = new FormData
+		console.log(f)
+		d.append('img', f)
+		ajax({
+			type: "post",
+			url: "http://localhost:8000/images",
+			data: d,
+			success: function(da) {
+				urlimg = da
+				console.log(da)
+			},
+			error: function(da) {
+				console.log(da)
+			}
+		})
+	}
+	btn.onclick = function() {
+//		alert(1)
+//					alert(pass.value.length)
+		if(user.value == '') {
+			alert('用户名不能为空')
+		} else if(pass.value == '') {
+			alert('密码不能为空')
+		} else if(urlimg == '') {
+			alert('图片不能为空')
+		} else {
+
+			ajax1({
+				type: "post",
+				url: "http://localhost:8000/loginup",
+				data: {
+					user: user.value,
+					pass: pass.value,
+					img: urlimg
+				},
+				success: function(da) {
+					console.log(da)
+				},
+				error: function(da) {
+					console.log(da)
+				}
+			})
+
+		}
+
+	}
+
+	btn1.onclick = function() {
+
+		ajax1({
+			type: "post",
+			url: "http://localhost:8000/loginin",
+			data: {
+				user: user1.value,
+				pass: pass1.value
+			},
+			success: function(da) {
+				console.log(da)
+				box.innerHTML = `
+				    <img src="http://localhost:8000${da}"/> 
+				 `
+				 alert("登陆成功")
+				 boxs.style.display='none'
+				 news.style.display='block'
+				 newstu.innerHTML = `
+				    <img src="http://localhost:8000${da}"/> 
+				 `
+			},
+			error: function(da) {
+				console.log(da)
+			}
+		})
+	}
+
+	function ajax(text) {
+
+		var xhr = new XMLHttpRequest()
+		//这里是post
+		xhr.open('post', text.url, true)
+		xhr.send(text.data)
+
+		xhr.onreadystatechange = function() {
+			if(xhr.readyState == 4) {
+				if(xhr.status >= 200 && xhr.status < 300 || xhr.status == 304) {
+					text.success(xhr.responseText)
+				} else {
+					text.error(xhr.status)
+				}
+			}
+		}
+	}
+
+	function ajax1(text) {
+
+		var xhr = new XMLHttpRequest()
+		if(text.type == "get") {
+			//这里是get
+			xhr.open('get', text.url + '?' + strUrl(text.data), true)
+			xhr.send()
+		} else {
+			//这里是post
+			xhr.open('post', text.url, true)
+			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+			xhr.send(strUrl(text.data))
+		}
+		xhr.onreadystatechange = function() {
+			if(xhr.readyState == 4) {
+				if(xhr.status >= 200 && xhr.status < 300 || xhr.status == 304) {
+					text.success(xhr.responseText)
+				} else {
+					text.error(xhr.status)
+				}
+			}
+		}
+
+		function strUrl(json) {
+			var arr = []
+			for(i in json) {
+				arr.push(i + '=' + json[i])
+			}
+			var str = arr.join('&')
+			return str
+
+		}
+	}
+</script>
